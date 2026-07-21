@@ -1,17 +1,17 @@
-# @robert.tools/sample
+# @robert.tools/setup
 
-A sample package for robert.tools.
+A setup package for robert.tools.
 
 ## Installation
 
 ```bash
-npm install @robert.tools/sample
+npm install @robert.tools/setup
 ```
 
 ## Usage
 
 ```typescript
-import { sample } from '@robert.tools/sample';
+import { setup } from '@robert.tools/setup';
 
-sample('hello'); // 'sample: hello'
+setup('hello'); // 'setup: hello'
 ```

@@ -1,11 +1,11 @@
-import { sample } from './index';
+import { setup } from './index';
 
-describe('@robert.tools/sample', () => {
-    it('should return a sample string', () => {
-        expect(sample('hello')).toBe('sample: hello');
+describe('@robert.tools/setup', () => {
+    it('should return a setup string', () => {
+        expect(setup('hello')).toBe('setup: hello');
     });
 
-    it('should return a sample string with empty input', () => {
-        expect(sample('')).toBe('sample: ');
+    it('should return a setup string with empty input', () => {
+        expect(setup('')).toBe('setup: ');
     });
 });

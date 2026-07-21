@@ -1,3 +1,5 @@
-export function sample(value: string): string {
-    return `sample: ${value}`;
+export function setup(value: string): string {
+    return `setup: ${value}`;
 }
+
+// init
