@@ -1,0 +1,10 @@
+{
+    "name": "@robert.tools/sample",
+    "version": "1.0.0",
+    "description": "A couple of tools to initialize and update a repo.",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": "./dist/index.js"
+    }
+}
