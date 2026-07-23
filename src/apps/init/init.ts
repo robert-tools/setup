@@ -85,7 +85,7 @@ export const replaceItems = (file: string, items: PLACEHOLDER[]) => {
 export const updateJson = (file: string, key: string, value: any) => {
     const json: any = FS.readFile(file, { returnType: 'json' });
     json[key] = value;
-    FS.writeFile(file, JSON.stringify(json, null, 4));
+    FS.writeFile(file, JSON.stringify(json, null, 4) + '\n');
 };
 
 export const init = (root: string) => {
