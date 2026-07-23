@@ -15,7 +15,7 @@
     ],
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
-        "run": "tsx src/init/index.ts",
+        "run": "tsx src/apps/index.ts",
         "test": "jest --coverage --runInBand --verbose",
         "lint": "eslint .",
         "check": "npm run lint && npm test && npm run build",
