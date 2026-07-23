@@ -10,7 +10,7 @@ import { LOG } from '@robert.tools/log';
 import * as INIT from './init';
 import mock from 'mock-fs';
 import { init } from './init';
-import { json } from 'stream/consumers';
+import { command } from '@robert.tools/cmd';
 
 // mocking raw response from command function
 const mockResponse = (input: any) => {
@@ -132,13 +132,11 @@ describe('replaceItems()', () => {
         // readline.cursorTo(process.stdout, 0);
     });
     it('should replace placeholders in a file', () => {
+        const oldLib = '@robert.tools/sample';
+        const newLib = '@robert.tools/SETUP';
         mock({
             'file.txt': 'this is a <name> file with a placeholder: <name>',
-            'file.json': `
-            { 
-                "xxx": "@robert.tools/sample" 
-            }
-            `,
+            'file.json': JSON.stringify({ xxx: oldLib }, null, 4),
         });
         const input = [
             {
@@ -146,29 +144,42 @@ describe('replaceItems()', () => {
                 value: 'SETUP',
             },
             {
-                key: '@robert.tools/sample',
-                value: '@robert.tools/SETUP',
+                key: oldLib,
+                value: newLib,
             },
         ];
-        FN('file.txt', input);
+        const changesFileTXT = FN('file.txt', input);
+        expect(changesFileTXT).toEqual({
+            file: 'file.txt',
+            changes: [
+                { key: '<name>', value: 'SETUP', count: 2 },
+                { key: oldLib, value: newLib, count: 0 },
+            ],
+        });
+
         expect(FS.readFile('file.txt')).toEqual(
             'this is a SETUP file with a placeholder: SETUP'
         );
-        FN('file.json', input);
+        const changesFileJSON = FN('file.json', input);
+        expect(changesFileJSON).toEqual({
+            file: 'file.json',
+            changes: [
+                { key: '<name>', value: 'SETUP', count: 0 },
+                { key: oldLib, value: newLib, count: 1 },
+            ],
+        });
         expect(FS.readFile('file.json')).toEqual(
-            `
-            { 
-                "xxx": "@robert.tools/SETUP" 
-            }
-            `
+            JSON.stringify({ xxx: newLib }, null, 4)
         );
     });
 });
 describe('init()', () => {
     const FN = init;
+    const SIZE = FS.sizeContent;
+    let spy: jest.SpyInstance;
     beforeEach(() => {
         mock.restore();
-        mock({});
+        // mock({});
     });
     afterEach(() => {
         mock.restore();
@@ -176,45 +187,81 @@ describe('init()', () => {
         // readline.cursorTo(process.stdout, 0);
     });
     it('should replace placeholders in a file', () => {
+        const description = 'Some Modules!'; // same size string to check per size
+        const name = 'foobar';
+        const package_json = {
+            name: '<name>',
+            version: '7.8.1',
+            description: '<description>',
+        };
+        const package_lock_json = {
+            name: '<name>',
+            version: '7.8.1',
+        };
+        const project_json = {
+            name: '<name>',
+            '🔖 version': '1.2.3',
+            description: '<description>',
+        };
+        const SRC_TEST = 'src/test.html';
+        const PACKAGE_JSON = 'package.json';
+        const PACKAGE_LOCK_JSON = 'package-lock.json';
+        const README = 'README.md';
+        const PROJECT_JSON = 'PROJECT.json';
+        const FILE = 'node_modules/file.json';
         mock({
-            node_modules: {
-                'file.json': `
-                { "name": "<name>" }
-                `,
-            },
-            src: {
-                'test.html': 'this is a <name> file ',
-            },
-            'README.md': 'this is a <name> file with a placeholder: <name>',
-            'package.json': `
-            { 
-                "name": "<name>",
-                "description": "<description>"
-            }
-            `,
+            [FILE]: `{ "name": "<name>" }`,
+            foo: 'bla',
+            [SRC_TEST]: 'this is a <name> file ',
+            [README]: 'this is a <name> file with a placeholder: <name>',
+            [PACKAGE_JSON]: JSON.stringify(package_json, null, 4),
+            [PACKAGE_LOCK_JSON]: JSON.stringify(package_lock_json, null, 4),
+            [PROJECT_JSON]: JSON.stringify(project_json, null, 4),
         });
         const spy = jest.spyOn(INIT, 'getPlaceholderItems').mockReturnValue({
             user: 'HORST',
-            repo: 'lorem',
-            description: 'This is mocked description',
+            repo: name,
+            description,
             license: 'MIT',
             author: 'Robert Willemelis',
             year: '2024',
         });
-        FN();
-        expect(FS.readFile('README.md')).toEqual(
-            'this is a lorem file with a placeholder: lorem'
-        );
-        const json = JSON.parse(FS.readFile('package.json') as string);
-        const json2 = JSON.parse(
-            FS.readFile('node_modules/file.json') as string
-        );
-        expect(json.name).toEqual('lorem');
-        expect(json.description).toEqual('This is mocked description');
-        expect(json2).toEqual({ name: '<name>' });
-        expect(FS.readFile('src/test.html') as string).toEqual(
-            'this is a lorem file '
-        );
+        const oldPackage = FS.readFile(PACKAGE_JSON) as string;
+        const oldPackageLock = FS.readFile(PACKAGE_LOCK_JSON) as string;
+        const oldFile = FS.readFile(FILE) as string;
+        const oldHTML = FS.readFile(SRC_TEST) as string;
+        const oldReadme = FS.readFile(README) as string;
+        const oldProject = FS.readFile(PROJECT_JSON) as string;
+        FN('.');
+        // package.json
+        const newPackage = FS.readFile(PACKAGE_JSON) as string;
+        expect(SIZE(oldPackage)).toEqual(SIZE(newPackage));
+        expect(oldPackage).not.toEqual(newPackage);
+
+        // package-lock.json
+        const newPackageLock = FS.readFile(PACKAGE_LOCK_JSON) as string;
+        expect(SIZE(oldPackageLock)).toEqual(SIZE(newPackageLock));
+        expect(oldPackageLock).not.toEqual(newPackageLock);
+
+        // PROJECT.json
+        const newProject = FS.readFile(PROJECT_JSON) as string;
+        expect(SIZE(oldProject)).toEqual(SIZE(newProject));
+        expect(oldProject).not.toEqual(newProject);
+
+        // file.json => no change
+        const newFile = FS.readFile(FILE) as string;
+        expect(SIZE(oldFile)).toEqual(SIZE(newFile));
+        expect(oldFile).toEqual(newFile);
+
+        // test.html
+        const newHTML = FS.readFile(SRC_TEST) as string;
+        expect(SIZE(oldHTML)).toEqual(SIZE(newHTML));
+        expect(oldHTML).not.toEqual(newHTML);
+
+        // README.md
+        const newReadme = FS.readFile(README) as string;
+        expect(SIZE(oldReadme)).toEqual(SIZE(newReadme));
+        expect(oldReadme).not.toEqual(newReadme);
         spy.mockRestore();
     });
 });

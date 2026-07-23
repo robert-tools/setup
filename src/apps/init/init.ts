@@ -71,20 +71,34 @@ export const getItems = () => {
 };
 export const replaceItems = (file: string, items: PLACEHOLDER[]) => {
     const base = FS.readFile(file) as string;
-    let content: string = base || '';
+    const changes = [];
+    let cnt: string = base || '';
     for (const item of items) {
-        const regex = new RegExp(item.key, 'g');
-        content = content.replace(regex, item.value);
+        const { key, value } = item;
+        const regex = new RegExp(key, 'g');
+        changes.push({ key, value, count: (cnt.match(regex) || []).length });
+        cnt = cnt.replace(regex, value);
     }
-    FS.writeFile(file, content);
+    FS.writeFile(file, cnt);
+    return { file, changes };
+};
+export const updateJson = (file: string, key: string, value: any) => {
+    const json: any = FS.readFile(file, { returnType: 'json' });
+    json[key] = value;
+    FS.writeFile(file, JSON.stringify(json, null, 4));
 };
 
-export const init = () => {
-    const files = FS.list('.').filter((file) => {
+export const init = (root: string) => {
+    const allFiles = FS.list('.');
+    const files = allFiles.filter((file) => {
         return !BLACKLIST.some((item) => file.includes(item));
     });
     const items = getItems();
     files.map((file) => {
-        replaceItems(file, items);
+        const changes = replaceItems(file, items);
+        LOG.DEBUG(`Replaced placeholders in ${file}:`, changes);
     });
+    updateJson(root + '/package.json', 'version', '1.0.0');
+    updateJson(root + '/package-lock.json', 'version', '1.0.0');
+    updateJson(root + '/PROJECT.json', '🔖 version', '1.0.0');
 };
