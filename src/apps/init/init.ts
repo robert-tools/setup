@@ -99,7 +99,18 @@ export const init = (root: string) => {
     files.map((file) => {
         const filePath = root + '/' + file;
         const changes = replaceItems(filePath, items);
-        LOG.DEBUG(`Replaced placeholders in ${file}:`, changes);
+        const numChanges = changes.changes.reduce(
+            (acc, change) => acc + change.count,
+            0
+        );
+        LOG.OK(`Replaced placeholders in ${file}:`, numChanges);
+        for (const change of changes.changes) {
+            if (change.count > 0) {
+                LOG.INFO(
+                    `Replaced ${change.count} occurrences of ${change.key} with ${change.value}`
+                );
+            }
+        }
     });
     updateJson(root + '/package.json', 'version', '1.0.0');
     updateJson(root + '/package-lock.json', 'version', '1.0.0');
