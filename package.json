@@ -5,10 +5,10 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "exports": {
-      ".": "./dist/index.js"
+        ".": "./dist/index.js"
     },
     "bin": {
-      "robert-tools-init": "./dist/init.js"
+        "robert-tools-init": "./dist/init.js"
     },
     "files": [
         "dist"
@@ -57,12 +57,12 @@
         "jest-environment-jsdom": "^29.6.2",
         "mock-fs": "^5.5.0",
         "ts-jest": "^29.4.0",
-        "typescript": "^5.9.0",
-        "tsx": "^4.22.3"
+        "tsx": "^4.22.3",
+        "typescript": "^5.9.0"
     },
     "dependencies": {
         "@robert.tools/cmd": "^1.0.0",
-        "@robert.tools/fs": "^1.1.1",
+        "@robert.tools/fs": "^1.1.2",
         "@robert.tools/log": "^1.0.0"
     }
 }

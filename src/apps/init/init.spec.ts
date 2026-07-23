@@ -10,7 +10,6 @@ import { LOG } from '@robert.tools/log';
 import * as INIT from './init';
 import mock from 'mock-fs';
 import { init } from './init';
-import { command } from '@robert.tools/cmd';
 
 // mocking raw response from command function
 const mockResponse = (input: any) => {
@@ -209,7 +208,7 @@ describe('init()', () => {
         const README = 'README.md';
         const PROJECT_JSON = 'PROJECT.json';
         const FILE = 'node_modules/file.json';
-        mock({
+        const MOCKED_FILES = {
             [FILE]: `{ "name": "<name>" }`,
             foo: 'bla',
             [SRC_TEST]: 'this is a <name> file ',
@@ -217,7 +216,8 @@ describe('init()', () => {
             [PACKAGE_JSON]: JSON.stringify(package_json, null, 4),
             [PACKAGE_LOCK_JSON]: JSON.stringify(package_lock_json, null, 4),
             [PROJECT_JSON]: JSON.stringify(project_json, null, 4),
-        });
+        };
+        mock(MOCKED_FILES);
         const spy = jest.spyOn(INIT, 'getPlaceholderItems').mockReturnValue({
             user: 'HORST',
             repo: name,

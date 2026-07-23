@@ -89,13 +89,16 @@ export const updateJson = (file: string, key: string, value: any) => {
 };
 
 export const init = (root: string) => {
-    const allFiles = FS.list('.');
-    const files = allFiles.filter((file) => {
-        return !BLACKLIST.some((item) => file.includes(item));
-    });
+    const files = FS.list(root, true, true, BLACKLIST);
+    LOG.DEBUG(`all files`, files);
     const items = getItems();
+    if (files.length > 20) {
+        LOG.FAIL(`Too many files (${files.length}) to process.`);
+        return;
+    }
     files.map((file) => {
-        const changes = replaceItems(file, items);
+        const filePath = root + '/' + file;
+        const changes = replaceItems(filePath, items);
         LOG.DEBUG(`Replaced placeholders in ${file}:`, changes);
     });
     updateJson(root + '/package.json', 'version', '1.0.0');
