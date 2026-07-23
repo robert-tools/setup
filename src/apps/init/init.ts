@@ -1,4 +1,4 @@
-import { command } from '@robert.tools/cmd';
+import { command, commandSafeFirst } from '@robert.tools/cmd';
 import { FS } from '@robert.tools/fs';
 import { LOG } from '@robert.tools/log';
 import type { PLACEHOLDER } from './init.d';
@@ -6,11 +6,15 @@ import type { PLACEHOLDER } from './init.d';
 const BLACKLIST = ['node_modules', '.git', 'dist', 'build', 'out', 'coverage'];
 const getRepoName = (a: string[]) => a[a.length - 1].replace('.git', '');
 
+export const jsonFormatted = (input: any): string => {
+    return JSON.stringify(input, null, 4) + '\n';
+};
+
 export const getRemoteRepoInfo = () => {
     let host = '';
     let user = '';
     let repo = '';
-    const result = command(`git config --get remote.origin.url`);
+    const result = commandSafeFirst(`git config --get remote.origin.url`);
     if (result.startsWith('git')) {
         const origin = result.split(':');
         host = origin[0].replace('git@', '');
@@ -27,7 +31,7 @@ export const getRemoteRepoInfo = () => {
     return { host, user, repo };
 };
 export const getUserName = () => {
-    const result = command(`git config --get user.name`);
+    const result = commandSafeFirst(`git config --get user.name`);
     return result;
 };
 const _ = encodeURIComponent;
@@ -85,7 +89,7 @@ export const replaceItems = (file: string, items: PLACEHOLDER[]) => {
 export const updateJson = (file: string, key: string, value: any) => {
     const json: any = FS.readFile(file, { returnType: 'json' });
     json[key] = value;
-    FS.writeFile(file, JSON.stringify(json, null, 4) + '\n');
+    FS.writeFile(file, jsonFormatted(json));
 };
 
 export const init = (root: string) => {

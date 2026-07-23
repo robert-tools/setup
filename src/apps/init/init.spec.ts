@@ -2,6 +2,7 @@ import {
     getGithubInfos,
     getRemoteRepoInfo,
     getUserName,
+    jsonFormatted,
     replaceItems,
 } from './init';
 import * as CMD from '@robert.tools/cmd';
@@ -16,7 +17,7 @@ const mockResponse = (input: any) => {
     const isObject =
         typeof input === 'object' && input !== null && !Array.isArray(input);
     const value = isObject ? JSON.stringify(input) : input;
-    const spy = jest.spyOn(CMD, 'command').mockReturnValue(value);
+    const spy = jest.spyOn(CMD, 'command').mockReturnValue(value + '\n');
     return spy;
 };
 
@@ -213,9 +214,9 @@ describe('init()', () => {
             foo: 'bla',
             [SRC_TEST]: 'this is a <name> file ',
             [README]: 'this is a <name> file with a placeholder: <name>',
-            [PACKAGE_JSON]: JSON.stringify(package_json, null, 4),
-            [PACKAGE_LOCK_JSON]: JSON.stringify(package_lock_json, null, 4),
-            [PROJECT_JSON]: JSON.stringify(project_json, null, 4),
+            [PACKAGE_JSON]: jsonFormatted(package_json),
+            [PACKAGE_LOCK_JSON]: jsonFormatted(package_lock_json),
+            [PROJECT_JSON]: jsonFormatted(project_json),
         };
         mock(MOCKED_FILES);
         const spy = jest.spyOn(INIT, 'getPlaceholderItems').mockReturnValue({
