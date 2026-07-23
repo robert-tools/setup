@@ -96,8 +96,9 @@ export const init = (root: string) => {
     const files = FS.list(root, true, true, BLACKLIST);
     LOG.DEBUG(`all files`, files);
     const items = getItems();
-    if (files.length > 20) {
+    if (files.length > 40) {
         LOG.FAIL(`Too many files (${files.length}) to process.`);
+        LOG.DEBUG(JSON.stringify(files, null, 2));
         return;
     }
     files.map((file) => {
