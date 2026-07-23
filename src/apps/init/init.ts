@@ -88,6 +88,10 @@ export const replaceItems = (file: string, items: PLACEHOLDER[]) => {
 };
 export const updateJson = (file: string, key: string, value: any) => {
     const json: any = FS.readFile(file, { returnType: 'json' });
+    if (typeof json !== 'object') {
+        LOG.WARN(`File ${file} not found or is not a valid JSON file.`);
+        return;
+    }
     json[key] = value;
     FS.writeFile(file, jsonFormatted(json));
 };
