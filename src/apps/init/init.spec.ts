@@ -20,6 +20,15 @@ const mockResponse = (input: any) => {
     const spy = jest.spyOn(CMD, 'command').mockReturnValue(value + '\n');
     return spy;
 };
+describe('jsonFormatted()', () => {
+    const FN = jsonFormatted;
+    it('should return a formatted JSON string', () => {
+        const input = { foo: 'bar', baz: 42 };
+        const expectedOutput = '{\n    "foo": "bar",\n    "baz": 42\n}\n';
+        const result = FN(input);
+        expect(result).toEqual(expectedOutput);
+    });
+});
 
 describe('getRemoteRepoInfo()', () => {
     const USER = 'HORST';
@@ -136,7 +145,7 @@ describe('replaceItems()', () => {
         const newLib = '@robert.tools/SETUP';
         mock({
             'file.txt': 'this is a <name> file with a placeholder: <name>',
-            'file.json': JSON.stringify({ xxx: oldLib }, null, 4),
+            'file.json': jsonFormatted({ xxx: oldLib }),
         });
         const input = [
             {
@@ -169,14 +178,13 @@ describe('replaceItems()', () => {
             ],
         });
         expect(FS.readFile('file.json')).toEqual(
-            JSON.stringify({ xxx: newLib }, null, 4)
+            jsonFormatted({ xxx: newLib })
         );
     });
 });
 describe('init()', () => {
     const FN = init;
     const SIZE = FS.sizeContent;
-    let spy: jest.SpyInstance;
     beforeEach(() => {
         mock.restore();
         // mock({});
@@ -210,7 +218,7 @@ describe('init()', () => {
         const PROJECT_JSON = 'PROJECT.json';
         const FILE = 'node_modules/file.json';
         const MOCKED_FILES = {
-            [FILE]: `{ "name": "<name>" }`,
+            [FILE]: jsonFormatted({ name: '<name>' }),
             foo: 'bla',
             [SRC_TEST]: 'this is a <name> file ',
             [README]: 'this is a <name> file with a placeholder: <name>',
